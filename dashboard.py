@@ -86,6 +86,7 @@ st.markdown("""
 SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
 
 CALENDARS = {
+    '공휴일':      {'id': 'ko.south_korea#holiday@group.v.calendar.google.com', 'color': '#FF453A', 'text': '#FFF'},
     '공용(H&K)': {'id': 'whitegoyange@gmail.com', 'color': '#20C997', 'text': '#000'},
     '아빠':      {'id': '88fd898ea7cbaeb8bbf70103be22ff505fb04927b3de105a6f58e8326c7b50ff@group.calendar.google.com', 'color': '#339AF0', 'text': '#FFF'},
     '엄마':      {'id': '7f7dcf46619e31f3b6e69580cf25d3d6640fabe540159eacc88206fa1e730d83@group.calendar.google.com', 'color': '#FF6B6B', 'text': '#FFF'},
@@ -254,25 +255,47 @@ cal_html += '</tr></thead><tbody>'
 for week in month_days:
     cal_html += '<tr>'
     for col_idx, day in enumerate(week):
+        # 이번 달에 속하지 않는 빈 칸 처리
         if day == 0:
             cal_html += '<td class="cal-td other-month"></td>'
             continue
 
+        # 1) 오늘 날짜(YYYY-MM-DD) 문자열 생성 및 오늘 여부 체크
         d_str = f"{st.session_state.view_year}-{st.session_state.view_month:02d}-{day:02d}"
         is_today = (st.session_state.view_year == real_today.year and 
                     st.session_state.view_month == real_today.month and 
                     day == real_today.day)
         
-        td_cls = "cal-td today" if is_today else "cal-td"
-        num_cls = "day-num sun" if col_idx == 0 else ("day-num sat" if col_idx == 6 else "day-num")
+        # 2) 해당 일자에 '공휴일' 일정이 있는지 검사
+        has_holiday = False
+        if d_str in events_map:
+            has_holiday = any(ev['name'] == '공휴일' for ev in events_map[d_str])
 
+        # 3) 셀(칸) 스타일 지정 (오늘 날짜 강조 테두리)
+        td_cls = "cal-td today" if is_today else "cal-td"
+        
+        # 4) 숫자 색상 지정: 일요일(col_idx == 0)이거나 공휴일이면 빨간색(day-num sun) 적용
+        if col_idx == 0 or has_holiday:
+            num_cls = "day-num sun"
+        elif col_idx == 6:
+            num_cls = "day-num sat"
+        else:
+            num_cls = "day-num"
+
+        # 5) HTML 날짜 칸 및 숫자 출력
         cal_html += f'<td class="{td_cls}">'
         cal_html += f'<div class="{num_cls}">{day}</div>'
 
+        # 6) 해당 날짜의 일정 뱃지(공휴일 포함) 출력
         if d_str in events_map:
-            for ev in events_map[d_str]:
-                chip = f'<span class="event-chip" style="background-color: {ev["color"]}; color: {ev["text"]};" title="[{ev["name"]}] {ev["summary"]}">'
-                chip += f'{ev["summary"]}'
+            # 공휴일이 먼저 눈에 띄도록 공휴일 일정을 맨 위로 정렬
+            sorted_events = sorted(events_map[d_str], key=lambda x: 0 if x['name'] == '공휴일' else 1)
+            
+            for ev in sorted_events:
+                # 공휴일은 이름 없이 명칭만 깔끔하게, 가족 일정은 [이름] 포함 출력
+                label = ev["summary"] if ev["name"] == '공휴일' else f'[{ev["name"]}] {ev["summary"]}'
+                chip = f'<span class="event-chip" style="background-color: {ev["color"]}; color: {ev["text"]};" title="{label}">'
+                chip += f'{label}'
                 chip += '</span>'
                 cal_html += chip
 
