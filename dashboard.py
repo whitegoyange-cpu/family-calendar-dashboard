@@ -128,19 +128,48 @@ def get_month_events(year, month):
                 singleEvents=True,
                 orderBy='startTime'
             ).execute()
+            
             for item in res.get('items', []):
-                start = item['start'].get('dateTime', item['start'].get('date'))
-                date_key = start[:10]
-                if date_key not in events_by_date:
-                    events_by_date[date_key] = []
-                events_by_date[date_key].append({
-                    'name': name,
-                    'summary': item.get('summary', '일정'),
-                    'color': info['color'],
-                    'text': info['text']
-                })
+                # 시작 날짜 및 종료 날짜 파싱
+                start_raw = item['start'].get('date') or item['start'].get('dateTime')
+                end_raw = item['end'].get('date') or item['end'].get('dateTime')
+                if not start_raw:
+                    continue
+
+                s_date = datetime.datetime.fromisoformat(start_raw.replace('Z', '+00:00')).date()
+                
+                # 종료일 처리 (구글 캘린더 '종일 일정'은 종료일이 다음 날 00시로 잡힘)
+                if end_raw:
+                    e_date = datetime.datetime.fromisoformat(end_raw.replace('Z', '+00:00')).date()
+                    if 'T' not in end_raw:  # 종일 일정인 경우 마지막 날 포함 조정
+                        e_date = e_date - datetime.timedelta(days=1)
+                else:
+                    e_date = s_date
+
+                # 현재 보고 있는 월의 범위와 겹치는 기간 계산
+                curr_month_start = datetime.date(year, month, 1)
+                curr_month_end = datetime.date(year, month, last_day)
+                
+                actual_start = max(s_date, curr_month_start)
+                actual_end = min(e_date, curr_month_end)
+
+                # 시작일부터 종료일까지 모든 날짜에 일정 추가
+                cur = actual_start
+                while cur <= actual_end:
+                    d_key = cur.strftime("%Y-%m-%d")
+                    if d_key not in events_by_date:
+                        events_by_date[d_key] = []
+                    events_by_date[d_key].append({
+                        'name': name,
+                        'summary': item.get('summary', '일정'),
+                        'color': info['color'],
+                        'text': info['text']
+                    })
+                    cur += datetime.timedelta(days=1)
+
         except Exception:
             continue
+            
     return events_by_date
 
 # =======================================================
