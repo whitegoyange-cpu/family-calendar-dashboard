@@ -89,7 +89,7 @@ CALENDARS = {
     '공휴일':      {'id': 'ko.south_korea#holiday@group.v.calendar.google.com', 'color': '#FF453A', 'text': '#FFF'},
     '공용(H&K)': {'id': 'whitegoyange@gmail.com', 'color': '#20C997', 'text': '#000'},
     '아빠':      {'id': '88fd898ea7cbaeb8bbf70103be22ff505fb04927b3de105a6f58e8326c7b50ff@group.calendar.google.com', 'color': '#339AF0', 'text': '#FFF'},
-    '엄마':      {'id': '7f7dcf46619e31f3b6e69580cf25d3d6640fabe540159eacc88206fa1e730d83@group.calendar.google.com', 'color': '#FF6B6B', 'text': '#FFF'},
+    '엄마':      {'id': '7f7dcf46619e31f3b6e69580cf25d3d6640fabe540159eacc88206fa1e730d83@group.calendar.google.com', 'color': '#FF7043', 'text': '#FFF'},
     '정원':      {'id': '51db02c009dbbe3a69fdf61d28cdc458f242dcd29260cb981f3384793d5b4ad8@group.calendar.google.com', 'color': '#CC5DE8', 'text': '#FFF'},
     '정빈':      {'id': 'f26677e78b93cb2afd0c5d67dde8a0eec92515055a5b9883b6d3ac6fe9c5e0ae@group.calendar.google.com', 'color': '#FCC419', 'text': '#000'},
     '현정':      {'id': 'b84e8e332f6f1a2b8013db4f92da306faf29bfbce33d882e4cebdbaa96d4b7ad@group.calendar.google.com', 'color': '#51CF66', 'text': '#000'},
